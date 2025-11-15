@@ -3270,80 +3270,15 @@ const response = await fetch(`${appConfig.wahaUrl}`, {
                 await this.confirmPayment();
             },
 
-     showQRISDinamisModal() {
-    // ⭐ CLEANUP & RESET SEBELUM MEMULAI
-    if (window.PaymentIntegration) {
-        PaymentIntegration.stopMonitoring();
-    }
-    
-    document.getElementById('qrisModalTitle').textContent = 'QRIS Dinamis';
-    document.getElementById('qrisAmountDisplay').textContent = `Rp ${POSModule.formatCurrency(this.currentOrderSummary.total)}`;
-    
-    // ⭐ SETUP LOADING STATE
-    document.getElementById('qrisImageContainer').innerHTML = '';
-    document.getElementById('qrisDinamisContent').classList.remove('hidden');
-    document.getElementById('qrisDinamisContent').innerHTML = `
-        <div class="bg-gray-100 p-4 rounded-lg mb-4">
-            <div class="animate-pulse bg-gray-300 h-48 w-48 mx-auto rounded-lg flex items-center justify-center">
-                <div class="text-center">
-                    <div class="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
-                    <span class="text-gray-600 text-sm">Generating QRIS...</span>
-                </div>
-            </div>
-        </div>
-        <p class="text-xs text-gray-500 mb-4">QR Code akan muncul dalam beberapa detik</p>
-    `;
-    
-    document.getElementById('qrisDisplayModal').classList.remove('hidden');
-    
-    // ⭐ JALANKAN GENERATE QRIS
-    this.generateQRISDinamis();
-},
+            showQRISDinamisModal() {
+                document.getElementById('qrisModalTitle').textContent = 'QRIS Dinamis';
+                document.getElementById('qrisAmountDisplay').textContent = `Rp ${POSModule.formatCurrency(this.currentOrderSummary.total)}`;
+                document.getElementById('qrisDinamisContent').classList.remove('hidden');
+                document.getElementById('qrisImageContainer').innerHTML = '';
+                
+                document.getElementById('qrisDisplayModal').classList.remove('hidden');
+            },
 
-// ⭐ TAMBAHKAN METHOD BARU INI:
-async generateQRISDinamis() {
-    try {
-        const amount = this.currentOrderSummary.total;
-        
-        const result = await PaymentIntegration.handleQRISPayment(amount);
-        
-        if (result.success) {
-            // ⭐ SEMBUNYIKAN LOADING, TAMPILKAN QR CODE
-            document.getElementById('qrisDinamisContent').classList.add('hidden');
-            document.getElementById('qrisImageContainer').innerHTML = result.html;
-            
-            // ⭐ START MONITORING
-            PaymentIntegration.startMonitoring(result.referenceId);
-        } else {
-            // ⭐ TAMPILKAN ERROR
-            document.getElementById('qrisDinamisContent').classList.add('hidden');
-            document.getElementById('qrisImageContainer').innerHTML = `
-                <div class="text-red-600 text-center p-4 bg-red-50 rounded-lg border border-red-200">
-                    <p class="font-semibold">❌ Gagal Generate QRIS</p>
-                    <p class="text-sm mt-1">${result.error}</p>
-                    <button onclick="PaymentModule.showQRISDinamisModal()" 
-                            class="mt-3 px-4 py-2 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700 transition">
-                        🔄 Coba Lagi
-                    </button>
-                </div>
-            `;
-            showNotification('Gagal generate QRIS: ' + result.error, 'error');
-        }
-    } catch (error) {
-        console.error('❌ QRIS Error:', error);
-        document.getElementById('qrisDinamisContent').classList.add('hidden');
-        document.getElementById('qrisImageContainer').innerHTML = `
-            <div class="text-red-600 text-center p-4 bg-red-50 rounded-lg border border-red-200">
-                <p class="font-semibold">❌ System Error</p>
-                <p class="text-sm mt-1">${error.message}</p>
-                <button onclick="PaymentModule.showQRISDinamisModal()" 
-                        class="mt-3 px-4 py-2 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700 transition">
-                    🔄 Coba Lagi
-                </button>
-            </div>
-        `;
-    }
-},
             showTransferBankModal() {
                 if (!this.currentOrderSummary) {
                     this.currentOrderSummary = POSModule.getOrderSummary();
@@ -3970,29 +3905,6 @@ try {
             closeDiscountModal();
             showNotification('Discount berhasil diterapkan');
         }
-// ⭐⭐ EVENT LISTENERS - TAMBAHKAN DI SINI ⭐⭐
-// ⭐ CLEANUP PADA PAGE UNLOAD
-window.addEventListener('beforeunload', () => {
-    if (window.PaymentIntegration) {
-        PaymentIntegration.cleanup();
-    }
-});
-
-window.addEventListener('pagehide', () => {
-    if (window.PaymentIntegration) {
-        PaymentIntegration.cleanup();
-    }
-});
-
-// ⭐ AUTO-INIT PAYMENT INTEGRATION
-document.addEventListener('DOMContentLoaded', function() {
-    setTimeout(() => {
-        if (window.PaymentIntegration) {
-            PaymentIntegration.init();
-            console.log('✅ Payment Integration auto-initialized');
-        }
-    }, 100);
-});
 
 // =============================================
 // WHATSAPP INTEGRATION - DIPERBAIKI
@@ -6540,9 +6452,6 @@ if (document.readyState === 'interactive' || document.readyState === 'complete')
 document.addEventListener('DOMContentLoaded', initializeAppWhenReady);
 
  </script>
-<!-- Load QRIS Modules -->
-<script src="/scripts/modules/qris-dinamis.js"></script>
-<script src="/scripts/modules/payment-integration.js"></script>
 
 </body>
 </html>
