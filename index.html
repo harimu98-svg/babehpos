@@ -3724,7 +3724,7 @@ const response = await fetch(`${appConfig.wahaUrl}`, {
             
             console.log('🚀 Generating QRIS Dinamis...');
             
-            const result = await PaymentIntegration.handleQRISPayment(amount);
+          const result = await QRISDinamis.generate(amount);
             
             if (result.success) {
                 // ⭐ SIMPAN REFERENCE ID DARI IPAYMU
@@ -3735,7 +3735,7 @@ const response = await fetch(`${appConfig.wahaUrl}`, {
                 document.getElementById('qrisDinamisContent').classList.add('hidden');
                 document.getElementById('qrisImageContainer').innerHTML = result.html;
                 
-                PaymentIntegration.startMonitoring(result.referenceId);
+             QRISDinamis.startPolling(result.referenceId);
                 
             } else {
                     // ⭐ LANGSUNG TAMPILKAN ERROR KE USER
@@ -4472,31 +4472,17 @@ async function manualPrintFromSuccess(orderNo, amount, referenceId) {
 }
 
 
-
-
-        
-// ⭐⭐ EVENT LISTENERS - TAMBAHKAN DI SINI ⭐⭐
-// ⭐ CLEANUP PADA PAGE UNLOAD
+// ⭐ CLEANUP PADA PAGE UNLOAD - UPDATE KE QRISDinamis
 window.addEventListener('beforeunload', () => {
-    if (window.PaymentIntegration) {
-        PaymentIntegration.cleanup();
+    if (window.QRISDinamis) {
+        QRISDinamis.cleanup();
     }
 });
 
 window.addEventListener('pagehide', () => {
-    if (window.PaymentIntegration) {
-        PaymentIntegration.cleanup();
+    if (window.QRISDinamis) {
+        QRISDinamis.cleanup();
     }
-});
-
-// ⭐ AUTO-INIT PAYMENT INTEGRATION
-document.addEventListener('DOMContentLoaded', function() {
-    setTimeout(() => {
-        if (window.PaymentIntegration) {
-            PaymentIntegration.init();
-            console.log('✅ Payment Integration auto-initialized');
-        }
-    }, 100);
 });
 // =============================================
 // WHATSAPP INTEGRATION - DIPERBAIKI
