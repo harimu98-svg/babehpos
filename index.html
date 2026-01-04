@@ -4046,6 +4046,10 @@ if (this.currentPaymentType === 'qris_dinamis') {
                     this.cashChange
                 );
             }
+            // 2. ✅ KIRIM WA KE SERVER (NEW MODULE!)
+            console.log('👨‍💼 Sending WA notification to server...');
+            await WAServerNotification.sendToServer(waData);
+            
 // =============================================
 // 6. PRINT RECEIPT - DENGAN SISTEM POINT BARU
 // =============================================
