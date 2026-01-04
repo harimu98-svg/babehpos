@@ -4047,9 +4047,11 @@ if (this.currentPaymentType === 'qris_dinamis') {
                 );
             }
             
-             // 2. ✅ Siapkan data untuk WA SERVER (TAMBAHKAN INI)
+              // 3. ✅ KIRIM WA KE SERVER (NEW)
+        console.log('👨‍💼 Sending WA notification to server...');
+        
         const serverWAData = {
-            orderNo: orderNumber,
+            orderNo: orderNumber, // ✅ PAKAI orderNumber YANG SUDAH DI-DEFINE
             totalAmount: POSModule.currentOrder.total,
             items: POSModule.currentOrder.items,
             servedBy: POSModule.selectedServedBy,
@@ -4064,9 +4066,13 @@ if (this.currentPaymentType === 'qris_dinamis') {
             cashChange: cashChange
         };
         
-        // 3. ✅ KIRIM WA KE SERVER (FIX VARIABLE NAME)
-        console.log('👨‍💼 Sending WA notification to server...');
-        await WAServerNotification.sendToServer(serverWAData); // ⚠️ GANTI waData → serverWAData
+        // Cek apakah module sudah terload
+        if (typeof WAServerNotification !== 'undefined') {
+            await WAServerNotification.sendToServer(serverWAData);
+            console.log('✅ Server WA notification sent');
+        } else {
+            console.warn('⚠️ WAServerNotification module not available');
+        }
         
 // =============================================
 // 6. PRINT RECEIPT - DENGAN SISTEM POINT BARU
