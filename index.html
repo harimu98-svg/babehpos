@@ -3417,7 +3417,7 @@ const response = await fetch(`${appConfig.wahaUrl}`, {
 
                 // Customer search
                 document.getElementById('customerSearch')?.addEventListener('input', (e) => {
-                    this.searchCustomers(e.target.value);
+                       this.loadCustomers(e.target.value.trim());  // ✅ LINE BARU
                 });
 
                 // Cash input event listener
