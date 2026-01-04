@@ -4048,31 +4048,31 @@ if (this.currentPaymentType === 'qris_dinamis') {
             }
             
               // 3. ✅ KIRIM WA KE SERVER (NEW)
-        console.log('👨‍💼 Sending WA notification to server...');
-        
-        const serverWAData = {
-            orderNo: orderNumber, // ✅ PAKAI orderNumber YANG SUDAH DI-DEFINE
-            totalAmount: POSModule.currentOrder.total,
-            items: POSModule.currentOrder.items,
-            servedBy: POSModule.selectedServedBy,
-            paymentType: paymentType,
-            kasir: user.name,
-            orderDate: today,
-            orderTime: nowTime,
-            subtotal: POSModule.currentOrder.subtotal,
-            discountAmount: POSModule.currentOrder.discount.amount,
-            redeemAmount: POSModule.currentOrder.redeem.amount,
-            cashReceived: cashReceived,
-            cashChange: cashChange
-        };
-        
-        // Cek apakah module sudah terload
-        if (typeof WAServerNotification !== 'undefined') {
-            await WAServerNotification.sendToServer(serverWAData);
-            console.log('✅ Server WA notification sent');
-        } else {
-            console.warn('⚠️ WAServerNotification module not available');
-        }
+console.log('👨‍💼 Sending WA notification to server...');
+
+const serverWAData = {
+    orderNo: orderNo, // ✅ BENAR: Gunakan orderNo yang sudah didefinisikan
+    totalAmount: POSModule.currentOrder.total,
+    items: POSModule.currentOrder.items,
+    servedBy: servedBy, // ✅ Gunakan servedBy yang sudah didefinisikan
+    paymentType: this.currentPaymentType, // ✅ Gunakan this.currentPaymentType
+    kasir: user.name,
+    orderDate: orderDate, // ✅ Gunakan orderDate yang sudah didefinisikan
+    orderTime: orderTime, // ✅ Gunakan orderTime yang sudah didefinisikan
+    subtotal: POSModule.currentOrder.subtotal,
+    discountAmount: POSModule.currentOrder.discount.amount,
+    redeemAmount: POSModule.currentOrder.redeem.amount,
+    cashReceived: this.cashReceived,
+    cashChange: this.cashChange
+};
+
+// Cek apakah module sudah terload
+if (typeof WAServerNotification !== 'undefined') {
+    await WAServerNotification.sendToServer(serverWAData);
+    console.log('✅ Server WA notification sent');
+} else {
+    console.warn('⚠️ WAServerNotification module not available');
+}
         
 // =============================================
 // 6. PRINT RECEIPT - DENGAN SISTEM POINT BARU
