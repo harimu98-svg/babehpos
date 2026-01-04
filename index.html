@@ -3099,23 +3099,28 @@ const response = await fetch(`${appConfig.wahaUrl}`, {
                 }
             },
 
-            async loadCustomers() {
+            async loadCustomers(searchTerm = '') {
     try {
-        // ⭐⭐ FORCE REFRESH: Clear cache sebelum load
-        CacheSystem.clearByType('customers');
-        
         const user = Auth.getCurrentUser();
-        this.customers = await Database.getCustomers(user.outlet);
         
-        // Render customer list untuk modal
+        // Clear cache jika ada
+        if (typeof CacheSystem !== 'undefined') {
+            CacheSystem.clearByType('customers');
+        }
+        
+        // Get customers
+        this.customers = await Database.getCustomers(user.outlet, searchTerm);
+        
+        // Render ke UI
         this.renderCustomerList(this.customers);
         
-        console.log('✅ Customers loaded with force refresh:', this.customers.length);
+        console.log(`✅ Displaying ${this.customers.length} customers`);
+        
     } catch (error) {
         console.error('Error loading customers:', error);
+        showNotification('Gagal memuat data customer', 'error');
     }
 },
-
             async loadServers() {
                 try {
                     const user = Auth.getCurrentUser();
