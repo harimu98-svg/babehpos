@@ -3088,17 +3088,24 @@ const response = await fetch(`${appConfig.wahaUrl}`, {
                 }
             },
 
-            async loadCustomers() {
-                try {
-                    const user = Auth.getCurrentUser();
-                    this.customers = await Database.getCustomers(user.outlet);
-                    
-                    // Render customer list untuk modal
-                    this.renderCustomerList(this.customers);
-                    
-                 console.log('✅ Customers loaded:', this.customers.length);
+            async loadCustomers(searchTerm = '') {
+    try {
+        const user = Auth.getCurrentUser();
+        
+        // Clear cache sebelum load (optional)
+        CacheSystem.clearByType('customers');
+        
+        // Panggil getCustomers yang sudah pakai RPC
+        this.customers = await Database.getCustomers(user.outlet, searchTerm);
+        
+        // Render ke UI
+        this.renderCustomerList(this.customers);
+        
+        console.log(`✅ Loaded ${this.customers.length} customers for search: "${searchTerm}"`);
+        
     } catch (error) {
         console.error('Error loading customers:', error);
+        showNotification('Gagal memuat data customer', 'error');
     }
 },
 
