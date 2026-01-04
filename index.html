@@ -1918,22 +1918,33 @@ console.log('✅ DateUtils loaded with full functionality');
     }
 },
 
-     async getCustomers(outletName) {
-    // ✅ LANGSUNG QUERY - Tidak ada cache check
+     (outletName, searchTerm = '') {
     try {
+        console.log(`🚀 [RPC] outlet=${outletName}, search="${searchTerm}"`);
+        
+        // Tentukan limit
+        const limit = searchTerm.trim() ? 100 : 50;
+        
         const { data, error } = await supabase
-            .from('membercard')
-            .select('*')
-            .eq('outlet', outletName)
-            .eq('status', 'active');
+            .rpc('search_all_members_pos', {
+                p_outlet: outletName,
+                p_search: searchTerm.trim(),
+                p_limit: limit
+            });
         
-        if (error) throw error;
+        if (error) {
+            console.error('❌ RPC Error:', error.message);
+            
+            // Fallback ke pagination
+            console.log('🔄 Using pagination fallback...');
+            return await this.getCustomersPaginated(outletName, searchTerm, limit);
+        }
         
-        const result = data || [];
-        // ✅ LANGSUNG RETURN - Tidak simpan cache
-        return result;
+        console.log(`✅ [RPC] Found ${data?.length || 0} customers`);
+        return data || [];
+        
     } catch (error) {
-        console.error('Error getting customers:', error);
+        console.error('Error in getCustomers:', error);
         return [];
     }
 },
