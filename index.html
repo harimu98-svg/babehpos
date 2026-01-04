@@ -1924,7 +1924,7 @@ console.log('✅ DateUtils loaded with full functionality');
         
         // Gunakan RPC function
         const { data, error } = await supabase
-            .rpc('search_customers_pos', {
+            .rpc('get_customers_for_pos', {
                 outlet_name: outletName,
                 search_text: searchTerm || null,
                 result_limit: 100
