@@ -1918,44 +1918,20 @@ console.log('✅ DateUtils loaded with full functionality');
     }
 },
 
-    async getCustomers(outletName, searchTerm = '') {
+     async getCustomers(outletName) {
+    // ✅ LANGSUNG QUERY - Tidak ada cache check
     try {
-        console.log(`🔍 Getting customers - Outlet: ${outletName}, Search: "${searchTerm}"`);
-        
-        // Gunakan RPC function
         const { data, error } = await supabase
-            .rpc('get_customers_for_pos', {
-                outlet_name: outletName,
-                search_text: searchTerm || null,
-                result_limit: 100
-            });
+            .from('membercard')
+            .select('*')
+            .eq('outlet', outletName)
+            .eq('status', 'active');
         
-        if (error) {
-            console.error('❌ RPC Error:', error);
-            
-            // Fallback: coba query biasa
-            console.log('🔄 Trying fallback query...');
-            let query = supabase
-                .from('membercard')
-                .select('*')
-                .eq('outlet', outletName)
-                .eq('status', 'active');
-            
-            if (searchTerm.trim()) {
-                query = query.or(`nama.ilike.%${searchTerm}%,"nomorWA".ilike.%${searchTerm}%`); // ⚠️ Perhatikan "nomorWA"
-            } else {
-                query = query.order('created_at', { ascending: false }).limit(10);
-            }
-            
-            const { data: fallbackData, error: fallbackError } = await query;
-            
-            if (fallbackError) throw fallbackError;
-            return fallbackData || [];
-        }
+        if (error) throw error;
         
-        console.log(`✅ Found ${data?.length || 0} customers via RPC`);
-        return data || [];
-        
+        const result = data || [];
+        // ✅ LANGSUNG RETURN - Tidak simpan cache
+        return result;
     } catch (error) {
         console.error('Error getting customers:', error);
         return [];
@@ -3088,24 +3064,20 @@ const response = await fetch(`${appConfig.wahaUrl}`, {
                 }
             },
 
-            async loadCustomers(searchTerm = '') {
+            async loadCustomers() {
     try {
-        const user = Auth.getCurrentUser();
-        
-        // Clear cache sebelum load (optional)
+        // ⭐⭐ FORCE REFRESH: Clear cache sebelum load
         CacheSystem.clearByType('customers');
         
-        // Panggil getCustomers yang sudah pakai RPC
-        this.customers = await Database.getCustomers(user.outlet, searchTerm);
+        const user = Auth.getCurrentUser();
+        this.customers = await Database.getCustomers(user.outlet);
         
-        // Render ke UI
+        // Render customer list untuk modal
         this.renderCustomerList(this.customers);
         
-        console.log(`✅ Loaded ${this.customers.length} customers for search: "${searchTerm}"`);
-        
+        console.log('✅ Customers loaded with force refresh:', this.customers.length);
     } catch (error) {
         console.error('Error loading customers:', error);
-        showNotification('Gagal memuat data customer', 'error');
     }
 },
 
