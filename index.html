@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <title>Babeh Barbershop POS</title>
+    <!-- Favicon -->
+    <link rel="icon" href="assets/logo.png" type="image/png">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -1916,20 +1918,33 @@ console.log('✅ DateUtils loaded with full functionality');
     }
 },
 
-          async getCustomers(outletName) {
-    // ✅ LANGSUNG QUERY - Tidak ada cache check
+      async getCustomers(outletName, searchTerm = '') {
     try {
-        const { data, error } = await supabase
+        let query = supabase
             .from('membercard')
             .select('*')
             .eq('outlet', outletName)
             .eq('status', 'active');
         
+        if (searchTerm.trim()) {
+            // MODE SEARCH: Cari yang match
+            query = query.or(
+                `nama.ilike.%${searchTerm}%,` +
+                `nomorWA.ilike.%${searchTerm}%,` +
+                `id_member.ilike.%${searchTerm}%`
+            ).limit(100); // Batasi 100 hasil
+        } else {
+            // MODE DEFAULT: 10 terbaru saja
+            query = query
+                .order('created_at', { ascending: false })
+                .limit(10);
+        }
+        
+        const { data, error } = await query;
         if (error) throw error;
         
-        const result = data || [];
-        // ✅ LANGSUNG RETURN - Tidak simpan cache
-        return result;
+        return data || [];
+        
     } catch (error) {
         console.error('Error getting customers:', error);
         return [];
