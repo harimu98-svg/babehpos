@@ -1918,31 +1918,42 @@ console.log('✅ DateUtils loaded with full functionality');
     }
 },
 
-      async getCustomers(outletName, searchTerm = '') {
+    async getCustomers(outletName, searchTerm = '') {
     try {
-        let query = supabase
-            .from('membercard')
-            .select('*')
-            .eq('outlet', outletName)
-            .eq('status', 'active');
+        console.log(`🔍 Getting customers - Outlet: ${outletName}, Search: "${searchTerm}"`);
         
-        if (searchTerm.trim()) {
-            // MODE SEARCH: Cari yang match
-            query = query.or(
-                `nama.ilike.%${searchTerm}%,` +
-                `nomorWA.ilike.%${searchTerm}%,` +
-                `id_member.ilike.%${searchTerm}%`
-            ).limit(100); // Batasi 100 hasil
-        } else {
-            // MODE DEFAULT: 10 terbaru saja
-            query = query
-                .order('created_at', { ascending: false })
-                .limit(10);
+        // Gunakan RPC function
+        const { data, error } = await supabase
+            .rpc('search_customers_pos', {
+                outlet_name: outletName,
+                search_text: searchTerm || null,
+                result_limit: 100
+            });
+        
+        if (error) {
+            console.error('❌ RPC Error:', error);
+            
+            // Fallback: coba query biasa
+            console.log('🔄 Trying fallback query...');
+            let query = supabase
+                .from('membercard')
+                .select('*')
+                .eq('outlet', outletName)
+                .eq('status', 'active');
+            
+            if (searchTerm.trim()) {
+                query = query.or(`nama.ilike.%${searchTerm}%,"nomorWA".ilike.%${searchTerm}%`); // ⚠️ Perhatikan "nomorWA"
+            } else {
+                query = query.order('created_at', { ascending: false }).limit(10);
+            }
+            
+            const { data: fallbackData, error: fallbackError } = await query;
+            
+            if (fallbackError) throw fallbackError;
+            return fallbackData || [];
         }
         
-        const { data, error } = await query;
-        if (error) throw error;
-        
+        console.log(`✅ Found ${data?.length || 0} customers via RPC`);
         return data || [];
         
     } catch (error) {
