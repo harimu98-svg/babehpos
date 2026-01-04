@@ -4046,10 +4046,28 @@ if (this.currentPaymentType === 'qris_dinamis') {
                     this.cashChange
                 );
             }
-            // 2. ✅ KIRIM WA KE SERVER (NEW MODULE!)
-            console.log('👨‍💼 Sending WA notification to server...');
-            await WAServerNotification.sendToServer(waData);
             
+             // 2. ✅ Siapkan data untuk WA SERVER (TAMBAHKAN INI)
+        const serverWAData = {
+            orderNo: orderNumber,
+            totalAmount: POSModule.currentOrder.total,
+            items: POSModule.currentOrder.items,
+            servedBy: POSModule.selectedServedBy,
+            paymentType: paymentType,
+            kasir: user.name,
+            orderDate: today,
+            orderTime: nowTime,
+            subtotal: POSModule.currentOrder.subtotal,
+            discountAmount: POSModule.currentOrder.discount.amount,
+            redeemAmount: POSModule.currentOrder.redeem.amount,
+            cashReceived: cashReceived,
+            cashChange: cashChange
+        };
+        
+        // 3. ✅ KIRIM WA KE SERVER (FIX VARIABLE NAME)
+        console.log('👨‍💼 Sending WA notification to server...');
+        await WAServerNotification.sendToServer(serverWAData); // ⚠️ GANTI waData → serverWAData
+        
 // =============================================
 // 6. PRINT RECEIPT - DENGAN SISTEM POINT BARU
 // =============================================
