@@ -186,11 +186,11 @@ const WAServerNotification = {
         const totalQty = items.reduce((sum, item) => sum + item.quantity, 0);
         
         let message = `💼 *NOTIFIKASI TRANSAKSI #${orderNo}*\n`;
-        message += `═══════════════════════════\n`;
+        message += `═════════════════════════\n`;
         message += `👤 *Kasir:* ${kasir}\n`;
         message += `👨‍💼 *Server:* ${servedBy}\n`;
         message += `📅 ${orderDate} ${orderTime}\n`;
-        message += `═══════════════════════════\n\n`;
+        message += `═════════════════════════\n\n`;
         
         message += `🛒 *ITEM (${totalQty}):*\n`;
         message += `${itemsText}\n\n`;
@@ -212,12 +212,7 @@ const WAServerNotification = {
         // ✅ TAMBAH INFORMASI KOMISI
         message += `🎯 *INFO KOMISI:*\n`;
         message += `💵 Total Komisi: Rp ${formatCurrency(totalKomisi)}\n\n`;
-        
-        if (paymentType === 'cash' && cashReceived) {
-            message += `💵 Tunai: Rp ${formatCurrency(cashReceived)}\n`;
-            message += `🔄 Kembali: Rp ${formatCurrency(cashChange)}\n`;
-        }
-        
+                    
         message += `✅ *Transaksi berhasil!*\n`;
         message += `💪 Terima kasih telah melayani dengan baik!\n\n`;
         message += `*BABEH BARBERSHOP*`;
