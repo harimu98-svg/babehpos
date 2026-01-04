@@ -1918,13 +1918,14 @@ console.log('✅ DateUtils loaded with full functionality');
     }
 },
 
-     (outletName, searchTerm = '') {
+    async getCustomers(outletName, searchTerm = '') {
     try {
-        console.log(`🚀 [RPC] outlet=${outletName}, search="${searchTerm}"`);
+        console.log(`🔍 Customer search: "${searchTerm}"`);
         
         // Tentukan limit
         const limit = searchTerm.trim() ? 100 : 50;
         
+        // Panggil RPC function
         const { data, error } = await supabase
             .rpc('search_all_members_pos', {
                 p_outlet: outletName,
@@ -1933,18 +1934,41 @@ console.log('✅ DateUtils loaded with full functionality');
             });
         
         if (error) {
-            console.error('❌ RPC Error:', error.message);
-            
-            // Fallback ke pagination
-            console.log('🔄 Using pagination fallback...');
-            return await this.getCustomersPaginated(outletName, searchTerm, limit);
+            console.warn('RPC failed, fallback to standard query:', error.message);
+            return await this.getCustomersFallback(outletName, searchTerm, limit);
         }
         
-        console.log(`✅ [RPC] Found ${data?.length || 0} customers`);
+        console.log(`✅ Found ${data?.length || 0} customers`);
         return data || [];
         
     } catch (error) {
-        console.error('Error in getCustomers:', error);
+        console.error('Error getting customers:', error);
+        return [];
+    }
+},
+
+// Simple fallback
+async getCustomersFallback(outletName, searchTerm = '', limit = 100) {
+    try {
+        let query = supabase
+            .from('membercard')
+            .select('*')
+            .eq('outlet', outletName)
+            .eq('status', 'active');
+        
+        if (searchTerm.trim()) {
+            query = query.or(`nama.ilike.%${searchTerm}%,nomorWA.ilike.%${searchTerm}%`);
+        } else {
+            query = query.order('created_at', { ascending: false });
+        }
+        
+        const { data, error } = await query.limit(limit);
+        
+        if (error) throw error;
+        return data || [];
+        
+    } catch (error) {
+        console.error('Fallback failed:', error);
         return [];
     }
 },
